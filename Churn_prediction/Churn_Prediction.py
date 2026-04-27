@@ -7,11 +7,13 @@
 # Predicting which customers will leave allows the bank to take
 # PROACTIVE action (special offers, better service) to retain them.
 # DATASET: Churn Modelling Dataset (same structure as Kaggle's
-# "Churn_Modelling.csv" — 10,000 bank customers)
+# "Churn_Modelling.csv" - 10,000 bank customers)
 # TARGET: Exited (1 = left the bank, 0 = stayed)
  
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
@@ -22,6 +24,16 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import warnings
 warnings.filterwarnings('ignore')
 sns.set_theme(style="whitegrid")
+
+
+def safe_show():
+    """Show plots when a GUI backend is available; otherwise close cleanly."""
+    try:
+        plt.show()
+    except Exception as e:
+        print(f"Plot display skipped (non-GUI environment): {e}")
+    finally:
+        plt.close()
  
 # FIX 6: Use modern numpy Generator instead of legacy global seed
 rng = np.random.default_rng(42)
@@ -44,7 +56,7 @@ df = pd.DataFrame({
     'Gender':           rng.choice(['Male', 'Female'], n, p=[0.55, 0.45]),
     'Age':              rng.integers(18, 92, n),
     'Tenure':           rng.integers(0, 10, n),
-    # FIX 2: Build Balance dynamically — works for any value of n
+    # FIX 2: Build Balance dynamically - works for any value of n
     'Balance':          np.where(
                             rng.random(n) < 0.3,
                             0.0,
@@ -82,7 +94,7 @@ print("=" * 60)
  
 df.drop(['RowNumber', 'CustomerId', 'Surname'], axis=1, inplace=True)
 print("Dropped: RowNumber, CustomerId, Surname (not predictive)")
-print(f"Missing values: {df.isnull().sum().sum()} — Clean!")
+print(f"Missing values: {df.isnull().sum().sum()} - Clean!")
 print(f"\nFeatures used: {list(df.columns[:-1])}")
  
 # ============================================================
@@ -150,10 +162,10 @@ axes[1][2].set_xlabel('Number of Products')
 axes[1][2].set_ylabel('Churn Rate')
 axes[1][2].tick_params(rotation=0)
  
-# FIX 5: rect leaves headroom for suptitle
+# FIX 5: rect leaves headroom for suptitle  
 plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.savefig('task3_eda.png', dpi=150, bbox_inches='tight')
-plt.show()
+safe_show()
 print("EDA plots saved!")
  
 # ============================================================
@@ -164,16 +176,16 @@ print("STEP 4: Encoding Categorical Features")
 print("=" * 60)
  
 df = pd.get_dummies(df, columns=['Geography'], drop_first=True)
-print("Geography: One-Hot Encoded → Geography_Germany, Geography_Spain")
+print("Geography: One-Hot Encoded -> Geography_Germany, Geography_Spain")
  
 le = LabelEncoder()
 df['Gender'] = le.fit_transform(df['Gender'])
-print("Gender: Label Encoded → Male=1, Female=0")
+print("Gender: Label Encoded -> Male=1, Female=0")
  
 X = df.drop('Exited', axis=1)
 y = df['Exited']
  
-# FIX 3: Split FIRST, then fit scaler on train only — prevents data leakage
+# FIX 3: Split FIRST, then fit scaler on train only - prevents data leakage
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
@@ -232,7 +244,7 @@ axes[1].set_ylabel('Actual')
  
 plt.tight_layout()
 plt.savefig('task3_feature_importance.png', dpi=150, bbox_inches='tight')
-plt.show()
+safe_show()
 print("Feature importance & confusion matrix saved!")
  
 print("\nTop 5 Most Important Features:")
